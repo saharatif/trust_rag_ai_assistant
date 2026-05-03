@@ -1,0 +1,18 @@
+{
+  "documents": [
+    {
+      "id": "policy_001",
+      "title": "Employee Travel Policy",
+      "source_type": "policy",
+      "department": "HR",
+      "text": "Employees may book economy class flights for standard business travel. Business class flights require director approval and may be used for international trips longer than eight hours. Reimbursement requires receipts submitted within thirty days of travel completion."
+    },
+    {
+      "id": "faq_001",
+      "title": "IT Support FAQ",
+      "source_type": "faq",
+      "department": "IT",
+      "text": "Employees should submit support tickets through the internal help desk portal. Critical account lockouts are prioritized during business hours. Password resets must use the approved identity verification process."
+    }
+  ]
+}
