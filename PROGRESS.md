@@ -17,6 +17,7 @@
 - [x] Sample document data: `data/sample_docs.json`
 - [x] Chunking automated tests: `tests/test_chunking.py`
 - [x] README includes local setup and run instructions
+- [x] Basic API rate limiting: `src/api/rate_limit.py`
 
 **Status:** Complete
 
@@ -88,3 +89,4 @@
 - Bug reports go in `bugs/` — use `bugs/TEMPLATE.md` as the starting format
 - Update this file at the end of every working session
 - Week 1 verified with `pytest`, `GET /health`, and `POST /ingest` using `data/sample_docs.json`.
+- Added configurable per-client rate limits for `GET /health` and `POST /ingest`.

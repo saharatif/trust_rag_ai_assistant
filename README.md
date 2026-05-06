@@ -27,6 +27,8 @@ Environment variables are optional for local development because safe defaults a
 | `LOG_LEVEL` | `INFO` | Python logging level |
 | `CHUNK_SIZE` | `800` | Maximum characters per document chunk |
 | `CHUNK_OVERLAP` | `120` | Character overlap between adjacent chunks |
+| `HEALTH_RATE_LIMIT_PER_MINUTE` | `120` | Maximum health check requests per client per minute |
+| `INGEST_RATE_LIMIT_PER_MINUTE` | `10` | Maximum ingestion requests per client per minute |
 
 Do not commit `.env` files or secrets. `.env` is ignored by git.
 

@@ -87,6 +87,7 @@ Audit Logging
 | Testing              | pytest                                       |
 | Configuration        | `.env` / environment variables               |
 | Logging              | Python logging / structured logs             |
+| API Protection       | Configurable per-client rate limiting        |
 
 ### Frontend
 
@@ -137,6 +138,7 @@ Acceptance criteria:
 - Endpoint returns HTTP 200.
 - Response confirms service status.
 - Endpoint can be used for local, Docker, and cloud health checks.
+- Endpoint is protected by a configurable per-client rate limit.
 
 ---
 
@@ -173,6 +175,7 @@ Required behavior:
 - Preserve document metadata.
 - Prepare chunks for retrieval.
 - Return ingestion summary.
+- Apply a configurable per-client rate limit to reduce accidental or abusive ingestion load.
 
 Expected response:
 
@@ -190,6 +193,7 @@ Acceptance criteria:
 - Large documents are chunked.
 - Metadata is preserved.
 - Ingestion errors are logged.
+- Excessive ingestion requests are rejected with HTTP 429.
 
 ---
 
@@ -627,6 +631,7 @@ Acceptance criteria:
 - Do not expose secrets in logs.
 - Human review required for risky answers.
 - Production secrets must use secure configuration.
+- Public API endpoints should use configurable rate limits to reduce abuse and protect costly downstream services.
 
 ## NFR-2: Reliability
 
@@ -673,6 +678,7 @@ trustrag-enterprise-assistant/
 ├── src/
 │   ├── api/
 │   │   ├── main.py
+│   │   ├── rate_limit.py
 │   │   ├── routes_chat.py
 │   │   ├── routes_ingest.py
 │   │   ├── routes_retrieve.py
@@ -710,6 +716,7 @@ trustrag-enterprise-assistant/
 │   ├── test_chunking.py
 │   ├── test_retriever.py
 │   ├── test_trust_score.py
+│   ├── test_rate_limit.py
 │   └── test_api.py
 │
 ├── data/
@@ -743,7 +750,7 @@ trustrag-enterprise-assistant/
 
 The client needs the initial backend foundation for the AI assistant.
 
-By the end of Week 1, the system must provide a working FastAPI backend that can run locally, expose a health check, accept document ingestion requests, clean and chunk documents, and include basic tests.
+By the end of Week 1, the system must provide a working FastAPI backend that can run locally, expose a health check, accept rate-limited document ingestion requests, clean and chunk documents, and include basic tests.
 
 ## Required Working Outcome by End of Week 1
 
@@ -754,7 +761,8 @@ The client should be able to:
 3. Submit sample documents through the ingestion endpoint.
 4. See documents split into chunks.
 5. See basic validation for invalid or empty documents.
-6. Run automated tests for the initial functionality.
+6. See excessive endpoint requests rejected with a clean rate-limit response.
+7. Run automated tests for the initial functionality.
 
 ## Required Endpoints
 
@@ -770,11 +778,13 @@ README.md
 .env.example
 requirements.txt
 src/api/main.py
+src/api/rate_limit.py
 src/rag/ingest.py
 src/rag/chunking.py
 src/utils/config.py
 src/utils/logging.py
 tests/test_chunking.py
+tests/test_rate_limit.py
 data/sample_docs.json
 ```
 
@@ -787,6 +797,8 @@ Week 1 is complete when:
 - `/ingest` accepts sample documents.
 - Invalid/empty documents are handled cleanly.
 - Documents are split into chunks.
+- `/health` and `/ingest` have configurable per-client rate limits.
+- Excessive requests return HTTP 429 with a clean error.
 - At least basic automated tests pass.
 - README includes local setup and run instructions.
 
@@ -1047,6 +1059,7 @@ The full project is complete when:
 
 - FastAPI backend runs locally.
 - Documents can be ingested.
+- Core API endpoints have configurable rate limits.
 - Documents are chunked.
 - Embeddings are generated.
 - Relevant chunks can be retrieved.
