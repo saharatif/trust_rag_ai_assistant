@@ -627,7 +627,7 @@ Acceptance criteria:
 ## NFR-1: Security
 
 - No API keys committed to Git.
-- Use `.env.example` for configuration examples.
+- Use `.env` for configuration examples.
 - Do not expose secrets in logs.
 - Human review required for risky answers.
 - Production secrets must use secure configuration.
@@ -672,7 +672,7 @@ trustrag-enterprise-assistant/
 ├── Dockerfile
 ├── docker-compose.yml
 ├── .dockerignore
-├── .env.example
+├── .env
 ├── requirements.txt
 │
 ├── src/
@@ -775,7 +775,7 @@ POST /ingest
 
 ```text
 README.md
-.env.example
+.env
 requirements.txt
 src/api/main.py
 src/api/rate_limit.py

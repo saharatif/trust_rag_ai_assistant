@@ -7,7 +7,7 @@
 
 ## Week 1 — Core API Foundation
 
-- [x] Project scaffold: `README.md`, `requirements.txt`, `.env.example`
+- [x] Project scaffold: `README.md`, `requirements.txt`, `.env`
 - [x] FastAPI app entry point: `src/api/main.py`
 - [x] Config via environment variables: `src/utils/config.py`
 - [x] Structured logging setup: `src/utils/logging.py`

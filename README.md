@@ -1,11 +1,13 @@
 # TrustRAG: Enterprise AI Knowledge Assistant
 
-TrustRAG is a production-style FastAPI backend for an enterprise retrieval-augmented AI assistant. Week 2 adds local RAG retrieval, grounded chat responses with citations, a safe unsupported-answer fallback, and a basic retrieval evaluation set.
+TrustRAG is a production-style FastAPI backend for an enterprise retrieval-augmented AI assistant. Week 2 adds Pinecone vector storage, OpenAI embeddings and chat, grounded answers with source citations, a safe unsupported-answer fallback, and a basic retrieval evaluation set.
 
 ## Requirements
 
 - Python 3.11+
 - pip
+- OpenAI API key
+- Pinecone API key (index: `trustrag`, dimension: 512, metric: cosine)
 
 ## Local Setup
 
@@ -13,12 +15,36 @@ TrustRAG is a production-style FastAPI backend for an enterprise retrieval-augme
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env
 ```
 
-## Configuration
+Create a `.env` file in the project root with your keys:
 
-Environment variables are optional for local development because safe defaults are provided.
+```bash
+APP_NAME=TrustRAG API
+APP_ENV=local
+LOG_LEVEL=INFO
+CHUNK_SIZE=800
+CHUNK_OVERLAP=120
+INGEST_RATE_LIMIT_PER_MINUTE=10
+RETRIEVE_RATE_LIMIT_PER_MINUTE=30
+CHAT_RATE_LIMIT_PER_MINUTE=20
+
+# OpenAI
+OPENAI_API_KEY=your-key
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+OPENAI_CHAT_MODEL=gpt-4o-mini
+
+# Pinecone
+PINECONE_API_KEY=your-key
+PINECONE_INDEX_NAME=trustrag
+PINECONE_CLOUD=aws
+PINECONE_REGION=us-east-1
+PINECONE_DIMENSIONS=512
+```
+
+`.env` is gitignored and never committed.
+
+## Configuration
 
 | Variable | Default | Description |
 | --- | --- | --- |
@@ -27,14 +53,17 @@ Environment variables are optional for local development because safe defaults a
 | `LOG_LEVEL` | `INFO` | Python logging level |
 | `CHUNK_SIZE` | `800` | Maximum characters per document chunk |
 | `CHUNK_OVERLAP` | `120` | Character overlap between adjacent chunks |
-| `INGEST_RATE_LIMIT_PER_MINUTE` | `10` | Maximum ingestion requests per client per minute |
-| `OPENAI_API_KEY` | empty | Reserved for provider-backed generation and embeddings |
-| `OPENAI_EMBEDDING_MODEL` | `text-embedding-3-small` | Reserved embedding model setting |
-| `OPENAI_CHAT_MODEL` | `gpt-4o-mini` | Reserved chat model setting |
-| `PINECONE_API_KEY` | empty | Reserved vector store setting |
-| `PINECONE_INDEX_NAME` | `trustrag` | Reserved Pinecone index name |
-
-Do not commit `.env` files or secrets. `.env` is ignored by git.
+| `INGEST_RATE_LIMIT_PER_MINUTE` | `10` | Max ingest requests per client per minute |
+| `RETRIEVE_RATE_LIMIT_PER_MINUTE` | `30` | Max retrieve requests per client per minute |
+| `CHAT_RATE_LIMIT_PER_MINUTE` | `20` | Max chat requests per client per minute |
+| `OPENAI_API_KEY` | — | Required for embeddings and answer generation |
+| `OPENAI_EMBEDDING_MODEL` | `text-embedding-3-small` | Embedding model |
+| `OPENAI_CHAT_MODEL` | `gpt-4o-mini` | Chat model |
+| `PINECONE_API_KEY` | — | Required for vector storage and retrieval |
+| `PINECONE_INDEX_NAME` | `trustrag` | Pinecone index name |
+| `PINECONE_CLOUD` | `aws` | Cloud provider of the Pinecone index |
+| `PINECONE_REGION` | `us-east-1` | Region of the Pinecone index |
+| `PINECONE_DIMENSIONS` | `512` | Must match the index dimension |
 
 ## Run the API
 
@@ -151,12 +180,10 @@ For unsupported questions, `/chat` returns `status: "unsupported"`, `confidence:
 
 ## Run the RAG Flow
 
-1. Start the API with `uvicorn src.api.main:app --reload`.
-2. Ingest documents with `curl -X POST http://127.0.0.1:8000/ingest -H "Content-Type: application/json" --data-binary @data/sample_docs.json`.
-3. Query retrieved chunks with `POST /retrieve`.
-4. Ask grounded questions with `POST /chat`.
-
-The current Week 2 implementation uses deterministic local embeddings and an in-memory vector store so it runs without external API keys.
+1. Start the API: `uvicorn src.api.main:app --reload`
+2. Ingest documents: `curl -X POST http://127.0.0.1:8000/ingest -H "Content-Type: application/json" --data-binary @data/sample_docs.json`
+3. Query chunks: `POST /retrieve`
+4. Ask questions: `POST /chat`
 
 ## Evaluation
 
@@ -164,7 +191,7 @@ The current Week 2 implementation uses deterministic local embeddings and an in-
 python -m src.eval.run_eval
 ```
 
-The eval script ingests `data/sample_docs.json`, runs the 10-question dataset in `data/eval_questions.json`, and reports top-1 retrieval accuracy.
+Ingests `data/sample_docs.json`, runs the 10-question dataset in `data/eval_questions.json`, reports top-1 retrieval accuracy, and saves results to `data/eval_results.json`.
 
 ## Tests
 
@@ -172,4 +199,4 @@ The eval script ingests `data/sample_docs.json`, runs the 10-question dataset in
 pytest
 ```
 
-Current coverage focuses on chunking behavior, metadata preservation, validation failures, rate limiting, retrieval ranking, and the Week 2 API endpoints.
+Current coverage: chunking, validation, config, logging, rate limiting, retrieval ranking, generator, prompt builder, and all API endpoints (unit + Pinecone/OpenAI integration).

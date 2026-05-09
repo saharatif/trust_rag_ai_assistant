@@ -19,7 +19,7 @@ The Developer is responsible for writing clean, well-structured frontend and bac
 **Security — Non-Negotiable**
 - Never commit API keys, LLM provider keys, database credentials, or any sensitive config to the repository.
 - All secrets go in `.env` — `.env` must always be in `.gitignore`.
-- `.env.example` must be kept up to date with all required variable names (values left blank).
+- `.env` must be kept up to date with all required variable names (values left blank).
 - Never log sensitive information or expose it in API responses.
 
 ---
