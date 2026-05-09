@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from src.api.rate_limit import rate_limiter
 from src.api.schemas import IngestRequest, IngestResponse
 from src.rag.ingest import ingest_documents
+from src.rag.retriever import index_chunks
 from src.utils.config import get_settings
 
 logger = logging.getLogger(__name__)
@@ -30,9 +31,9 @@ settings = get_settings()
 )
 def ingest(request: IngestRequest) -> IngestResponse:
     try:
-        # The underscore discards the chunk list — the caller only needs the summary.
-        # Chunks will be stored in Pinecone in Week 2.
-        _, summary = ingest_documents(request.documents, settings)
+        chunks, summary = ingest_documents(request.documents, settings)
+        # Pass settings so index_chunks routes to Pinecone when the key is configured
+        index_chunks(chunks, settings)
         return IngestResponse(**summary)
     except (ValueError, RuntimeError) as exc:
         # ValueError: invalid document content (e.g. empty text after stripping)

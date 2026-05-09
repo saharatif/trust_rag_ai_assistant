@@ -1,7 +1,7 @@
 # TrustRAG — Project Progress
 
-## Current Week: Week 1
-## Last Updated: 2026-05-02
+## Current Week: Week 2
+## Last Updated: 2026-05-09
 
 ---
 
@@ -25,18 +25,18 @@
 
 ## Week 2 — RAG MVP
 
-- [ ] Embedding generation: `src/rag/embeddings.py`
-- [ ] Vector store setup (Chroma or FAISS)
-- [ ] Retrieval logic: `src/rag/retriever.py`
-- [ ] Retrieval endpoint: `POST /retrieve`
-- [ ] Prompt builder: `src/rag/prompt_builder.py`
-- [ ] LLM answer generator: `src/rag/generator.py`
-- [ ] Chat endpoint: `POST /chat`
-- [ ] Evaluation script: `src/eval/run_eval.py`
-- [ ] Evaluation dataset (10+ questions): `data/eval_questions.json`
-- [ ] Retriever tests: `tests/test_retriever.py`
+- [x] Embedding generation: `src/rag/embeddings.py`
+- [x] Vector store setup (in-memory local store)
+- [x] Retrieval logic: `src/rag/retriever.py`
+- [x] Retrieval endpoint: `POST /retrieve`
+- [x] Prompt builder: `src/rag/prompt_builder.py`
+- [x] LLM answer generator: `src/rag/generator.py`
+- [x] Chat endpoint: `POST /chat`
+- [x] Evaluation script: `src/eval/run_eval.py`
+- [x] Evaluation dataset (10+ questions): `data/eval_questions.json`
+- [x] Retriever tests: `tests/test_retriever.py`
 
-**Status:** Not Started
+**Status:** Complete
 
 ---
 
@@ -81,7 +81,7 @@
 
 ## Known Issues
 
-- None currently
+- External OpenAI/Pinecone provider wiring is still reserved for a later hardening pass; Week 2 runs locally with deterministic embeddings and an in-memory vector store.
 
 ## Notes
 
@@ -90,3 +90,4 @@
 - Update this file at the end of every working session
 - Week 1 verified with `pytest`, `GET /health`, and `POST /ingest` using `data/sample_docs.json`.
 - Added configurable per-client rate limits for `GET /health` and `POST /ingest`.
+- Week 2 verified with `pytest` and `python -m src.eval.run_eval` at 10/10 top-1 retrieval accuracy.

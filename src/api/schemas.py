@@ -41,3 +41,67 @@ class IngestResponse(BaseModel):
     documents_received: int   # Number of documents in the request
     chunks_created: int       # Total chunks produced across all documents
     status: str               # Always "success" when no error is raised
+
+
+class RetrieveRequest(BaseModel):
+    """Request body for POST /retrieve."""
+
+    query: str = Field(min_length=1)
+    top_k: int = Field(default=5, ge=1, le=20)
+
+    @field_validator("query")
+    @classmethod
+    def reject_blank_query(cls, value: str) -> str:
+        stripped = value.strip()
+        if not stripped:
+            raise ValueError("Query cannot be blank")
+        return stripped
+
+
+class RetrievedChunk(BaseModel):
+    """One retrieved chunk with source metadata and similarity score."""
+
+    chunk_id: str
+    document_id: str
+    title: str
+    score: float
+    text: str
+
+
+class RetrieveResponse(BaseModel):
+    """Response returned by POST /retrieve."""
+
+    query: str
+    matches: list[RetrievedChunk]
+
+
+class ChatRequest(BaseModel):
+    """Request body for POST /chat."""
+
+    question: str = Field(min_length=1)
+    top_k: int = Field(default=5, ge=1, le=20)
+
+    @field_validator("question")
+    @classmethod
+    def reject_blank_question(cls, value: str) -> str:
+        stripped = value.strip()
+        if not stripped:
+            raise ValueError("Question cannot be blank")
+        return stripped
+
+
+class SourceCitation(BaseModel):
+    """Source citation returned with a grounded answer."""
+
+    document_id: str
+    title: str
+    chunk_id: str
+
+
+class ChatResponse(BaseModel):
+    """Response returned by POST /chat."""
+
+    answer: str
+    sources: list[SourceCitation]
+    confidence: Literal["low", "medium", "high"]
+    status: Literal["answered", "unsupported"]

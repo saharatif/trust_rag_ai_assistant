@@ -5,7 +5,9 @@
 
 from fastapi import FastAPI
 
+from src.api.routes_chat import router as chat_router
 from src.api.routes_ingest import router as ingest_router
+from src.api.routes_retrieve import router as retrieve_router
 from src.utils.config import get_settings
 from src.utils.logging import configure_logging
 
@@ -20,6 +22,8 @@ app = FastAPI(title=settings.app_name)
 
 # Register the ingest router so POST /ingest is available
 app.include_router(ingest_router)
+app.include_router(retrieve_router)
+app.include_router(chat_router)
 
 
 @app.get("/health")

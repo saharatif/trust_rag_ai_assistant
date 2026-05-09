@@ -11,11 +11,19 @@ import sys
 from datetime import datetime, timezone
 from typing import Any
 
+# Standard fields present on every LogRecord — used to isolate caller-supplied extras
+_STANDARD_LOG_KEYS = frozenset(
+    logging.LogRecord(
+        name="", level=0, pathname="", lineno=0, msg="", args=(), exc_info=None
+    ).__dict__.keys()
+) | {"message", "asctime"}
+
 
 class JsonFormatter(logging.Formatter):
     """Formats every log record as a single-line JSON object.
 
     Each log line contains: timestamp, level, logger name, message,
+    any extra fields passed via logger.info(..., extra={...}),
     and optionally a full exception traceback if one was captured.
     """
 
@@ -26,6 +34,17 @@ class JsonFormatter(logging.Formatter):
             "logger": record.name,       # e.g. "src.rag.ingest" — shows which module logged
             "message": record.getMessage(),
         }
+
+        # Include any structured fields passed via extra={} so they appear in the log line.
+        # e.g. logger.info("Chat completed", extra={"question": q, "confidence": c})
+        extra = {
+            key: value
+            for key, value in vars(record).items()
+            if key not in _STANDARD_LOG_KEYS
+        }
+        if extra:
+            payload["extra"] = extra
+
         # Only include the exception key when there is actually an exception to report
         if record.exc_info:
             payload["exception"] = self.formatException(record.exc_info)

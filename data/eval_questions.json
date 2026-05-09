@@ -1,0 +1,42 @@
+[
+  {
+    "question": "Can employees book business class flights?",
+    "expected_document_id": "policy_001"
+  },
+  {
+    "question": "When are travel receipts due?",
+    "expected_document_id": "policy_001"
+  },
+  {
+    "question": "What class of flight is standard for business travel?",
+    "expected_document_id": "policy_001"
+  },
+  {
+    "question": "Who approves business class flights?",
+    "expected_document_id": "policy_001"
+  },
+  {
+    "question": "Where should employees submit support tickets?",
+    "expected_document_id": "faq_001"
+  },
+  {
+    "question": "How are account lockouts prioritized?",
+    "expected_document_id": "faq_001"
+  },
+  {
+    "question": "What process is required for password resets?",
+    "expected_document_id": "faq_001"
+  },
+  {
+    "question": "Which department owns the IT support FAQ?",
+    "expected_document_id": "faq_001"
+  },
+  {
+    "question": "What trips may use business class flights?",
+    "expected_document_id": "policy_001"
+  },
+  {
+    "question": "What must employees submit for reimbursement?",
+    "expected_document_id": "policy_001"
+  }
+]
