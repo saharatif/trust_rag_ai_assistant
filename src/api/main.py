@@ -4,6 +4,7 @@
 #   uvicorn src.api.main:app --reload
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.routes_chat import router as chat_router
 from src.api.routes_ingest import router as ingest_router
@@ -19,6 +20,22 @@ configure_logging(settings.log_level)
 
 # Create the FastAPI app — title appears in the auto-generated /docs UI
 app = FastAPI(title=settings.app_name)
+
+# Allow the Vite dev server and any configured frontend origin to call the API.
+# In production, restrict allow_origins to the actual frontend domain.
+_cors_origins = [
+    "http://localhost:5173",   # Vite dev server
+    "http://localhost:4173",   # Vite preview
+    "http://localhost:8000",   # same-origin requests
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_cors_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Register the ingest router so POST /ingest is available
 app.include_router(ingest_router)
