@@ -216,3 +216,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# CloudFormation parameters (contain secrets)
+infra/cloudformation/parameters.dev.json
+frontend/node_modules/
+frontend/dist/
