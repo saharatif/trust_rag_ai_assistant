@@ -1,6 +1,6 @@
 # Multi-stage build for TrustRAG
 # Stage 1: Builder — install deps (needs gcc for some packages)
-FROM python:3.11-slim AS builder
+FROM --platform=linux/amd64 python:3.11-slim AS builder
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Stage 2: Runtime — lean image, no build tools
-FROM python:3.11-slim
+FROM --platform=linux/amd64 python:3.11-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
