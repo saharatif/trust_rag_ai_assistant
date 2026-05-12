@@ -4,7 +4,7 @@
 import logging
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
 from src.db import queries
@@ -83,7 +83,7 @@ class ReviewActionResponse(BaseModel):
     summary="List pending reviews",
     description="Get all responses awaiting human review, newest first.",
 )
-def list_pending_reviews(limit: int = Field(default=50, ge=1, le=500)):
+def list_pending_reviews(limit: int = Query(default=50, ge=1, le=500)):
     """List all pending reviews."""
     try:
         reviews = queries.list_pending_reviews(limit=limit)

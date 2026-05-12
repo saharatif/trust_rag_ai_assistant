@@ -5,9 +5,10 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException
 
 from src.api.rate_limit import rate_limiter
-from src.api.schemas import ChatRequest, ChatResponse, SourceCitation
+from src.api.schemas import ChatRequest, ChatResponse
 from src.rag.generator import generate_answer
 from src.rag.retriever import retrieve
+from src.trust.trust_score import calculate_trust_score, should_route_for_review, get_review_reason
 from src.utils.config import get_settings
 
 logger = logging.getLogger(__name__)
@@ -29,38 +30,38 @@ settings = get_settings()
 )
 def chat(request: ChatRequest) -> ChatResponse:
     try:
-        # Pass settings so both retrieve and generate_answer use real APIs
         matches = retrieve(query=request.question, top_k=request.top_k, settings=settings)
-        answer, confidence, status = generate_answer(
+        answer, confidence, answer_status = generate_answer(
             question=request.question,
             matches=matches,
             settings=settings,
         )
-        sources = [
-            SourceCitation(
-                document_id=match.document_id,
-                title=match.title,
-                chunk_id=match.chunk_id,
-            )
-            for match in matches
-        ]
-        if status == "unsupported":
-            sources = []
+
+        trust_score = calculate_trust_score(
+            retrieved_matches=matches,
+            answer_confidence=confidence,
+            answer_status=answer_status,
+        )
+        needs_review = should_route_for_review(trust_score)
+        review_reason = get_review_reason(trust_score)
 
         logger.info(
             "Chat request completed",
             extra={
                 "question": request.question,
-                "matched_chunks": [match.chunk_id for match in matches],
-                "status": status,
+                "matched_chunks": [m.chunk_id for m in matches],
+                "status": answer_status,
                 "confidence": confidence,
             },
         )
         return ChatResponse(
             answer=answer,
-            sources=sources,
             confidence=confidence,
-            status=status,
+            answer_status=answer_status,
+            trust_score=trust_score,
+            sources_used=len(matches) if answer_status == "answered" else 0,
+            needs_review=needs_review,
+            review_reason=review_reason,
         )
     except ValueError as exc:
         logger.exception("Invalid chat request")

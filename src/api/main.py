@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.api.routes_chat import router as chat_router
 from src.api.routes_ingest import router as ingest_router
 from src.api.routes_retrieve import router as retrieve_router
+from src.api.routes_review import router as review_router
 from src.utils.config import get_settings
 from src.utils.logging import configure_logging
 
@@ -41,6 +42,7 @@ app.add_middleware(
 app.include_router(ingest_router)
 app.include_router(retrieve_router)
 app.include_router(chat_router)
+app.include_router(review_router)
 
 
 @app.get("/health")

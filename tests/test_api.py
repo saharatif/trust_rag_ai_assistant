@@ -9,8 +9,18 @@ from unittest.mock import patch, MagicMock
 from src.api.main import app
 from src.api.schemas import DocumentIngestItem, IngestRequest, RetrieveRequest
 from src.rag.retriever import reset_retriever
+from src.api.rate_limit import rate_limiter
 
 client = TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def reset_state():
+    reset_retriever()
+    rate_limiter.reset()
+    yield
+    reset_retriever()
+    rate_limiter.reset()
 
 
 class TestHealthEndpoint:

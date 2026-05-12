@@ -102,6 +102,9 @@ class ChatResponse(BaseModel):
     """Response returned by POST /chat."""
 
     answer: str
-    sources: list[SourceCitation]
     confidence: Literal["low", "medium", "high"]
-    status: Literal["answered", "unsupported"]
+    answer_status: Literal["answered", "unsupported"]
+    trust_score: float
+    sources_used: int
+    needs_review: bool
+    review_reason: str | None = None
