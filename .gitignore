@@ -222,3 +222,4 @@ infra/cloudformation/parameters.dev.json
 frontend/node_modules/
 frontend/dist/
 AWSCLIV2.pkg
+frontend/.env
