@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { PdfUploader } from "@/components/PdfUploader";
 import { api } from "@/lib/api";
 import type { IngestDocument } from "@/types";
 
@@ -76,6 +78,27 @@ export function Ingest() {
           {error}
         </div>
       )}
+
+      {/* PDF uploader */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Upload PDFs</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PdfUploader
+            onExtracted={(extracted) => setDocs((prev) => {
+              const isEmpty = prev.length === 1 && !prev[0].id && !prev[0].text;
+              return isEmpty ? extracted : [...prev, ...extracted];
+            })}
+          />
+        </CardContent>
+      </Card>
+
+      <div className="flex items-center gap-3">
+        <Separator className="flex-1" />
+        <span className="text-xs text-muted-foreground">or fill in manually</span>
+        <Separator className="flex-1" />
+      </div>
 
       <div className="space-y-4">
         {docs.map((doc, index) => (

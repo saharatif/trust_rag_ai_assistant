@@ -1,16 +1,15 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, AlertTriangle } from "lucide-react";
+import { Send, Bot, User, AlertTriangle, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { TrustScoreBadge } from "@/components/TrustScoreBadge";
 import { api } from "@/lib/api";
+import { useChatContext, nextId } from "@/lib/ChatContext";
 import type { ChatMessage } from "@/types";
 
-let msgId = 0;
-
 export function Chat() {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const { messages, addMessage, clearMessages } = useChatContext();
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,14 +26,14 @@ export function Chat() {
     setInput("");
     setError(null);
 
-    const userMsg: ChatMessage = { id: String(++msgId), role: "user", content: question };
-    setMessages((prev) => [...prev, userMsg]);
+    const userMsg: ChatMessage = { id: nextId(), role: "user", content: question };
+    addMessage(userMsg);
     setLoading(true);
 
     try {
       const res = await api.chat(question);
-      const assistantMsg: ChatMessage = {
-        id: String(++msgId),
+      addMessage({
+        id: nextId(),
         role: "assistant",
         content: res.answer,
         trustScore: res.trust_score,
@@ -43,8 +42,7 @@ export function Chat() {
         sourcesUsed: res.sources_used,
         needsReview: res.needs_review,
         reviewReason: res.review_reason,
-      };
-      setMessages((prev) => [...prev, assistantMsg]);
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Request failed");
     } finally {
@@ -62,9 +60,16 @@ export function Chat() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="px-6 py-4 border-b">
-        <h1 className="text-lg font-semibold">Chat</h1>
-        <p className="text-sm text-muted-foreground">Ask questions from your approved documents</p>
+      <div className="px-6 py-4 border-b flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-semibold">Chat</h1>
+          <p className="text-sm text-muted-foreground">Ask questions from your approved documents</p>
+        </div>
+        {messages.length > 0 && (
+          <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground" onClick={clearMessages}>
+            <Trash2 className="h-4 w-4" /> Clear
+          </Button>
+        )}
       </div>
 
       {/* Messages */}
@@ -93,21 +98,15 @@ export function Chat() {
                 {msg.content}
               </div>
 
-              {/* Answer metadata */}
               {msg.role === "assistant" && msg.trustScore !== undefined && (
                 <div className="flex flex-wrap gap-2 items-center">
                   <TrustScoreBadge score={msg.trustScore} />
-
-                  <Badge variant="outline" className="text-xs">
-                    {msg.confidence} confidence
-                  </Badge>
-
+                  <Badge variant="outline" className="text-xs">{msg.confidence} confidence</Badge>
                   {msg.sourcesUsed !== undefined && (
                     <Badge variant="outline" className="text-xs">
                       {msg.sourcesUsed} source{msg.sourcesUsed !== 1 ? "s" : ""}
                     </Badge>
                   )}
-
                   {msg.needsReview && (
                     <Badge variant="warning" className="gap-1 text-xs">
                       <AlertTriangle className="h-3 w-3" />
@@ -141,9 +140,7 @@ export function Chat() {
         )}
 
         {error && (
-          <div className="text-sm text-destructive bg-destructive/10 rounded-lg px-4 py-3">
-            {error}
-          </div>
+          <div className="text-sm text-destructive bg-destructive/10 rounded-lg px-4 py-3">{error}</div>
         )}
 
         <div ref={bottomRef} />
