@@ -1,0 +1,46 @@
+[
+  {
+    "ParameterKey": "Environment",
+    "ParameterValue": "dev"
+  },
+  {
+    "ParameterKey": "ImageUri",
+    "ParameterValue": "REPLACE_WITH_ECR_URI:latest"
+  },
+  {
+    "ParameterKey": "VpcId",
+    "ParameterValue": "REPLACE_WITH_VPC_ID"
+  },
+  {
+    "ParameterKey": "SubnetIds",
+    "ParameterValue": "REPLACE_WITH_SUBNET_ID_1,REPLACE_WITH_SUBNET_ID_2"
+  },
+  {
+    "ParameterKey": "OpenAIApiKey",
+    "ParameterValue": "REPLACE_WITH_OPENAI_API_KEY"
+  },
+  {
+    "ParameterKey": "PineconeApiKey",
+    "ParameterValue": "REPLACE_WITH_PINECONE_API_KEY"
+  },
+  {
+    "ParameterKey": "PineconeIndexName",
+    "ParameterValue": "trustrag"
+  },
+  {
+    "ParameterKey": "ContainerPort",
+    "ParameterValue": "8000"
+  },
+  {
+    "ParameterKey": "DesiredCount",
+    "ParameterValue": "1"
+  },
+  {
+    "ParameterKey": "TaskCpu",
+    "ParameterValue": "512"
+  },
+  {
+    "ParameterKey": "TaskMemory",
+    "ParameterValue": "1024"
+  }
+]

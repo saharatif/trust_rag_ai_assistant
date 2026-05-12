@@ -61,18 +61,18 @@
 
 ## Week 4 — Productionization, CI/CD, Docker, and AWS Deployment
 
-- [ ] Dockerfile
-- [ ] Docker Compose: `docker-compose.yml`
-- [ ] `.dockerignore`
-- [ ] GitHub Actions CI pipeline: `.github/workflows/ci.yml`
-- [ ] CloudFormation template: `infra/cloudformation/template.yml`
-- [ ] CloudFormation dev parameters: `infra/cloudformation/parameters.dev.json`
-- [ ] AWS deployment guide: `docs/AWS_DEPLOYMENT.md`
-- [ ] Final demo script: `docs/DEMO_SCRIPT.md`
-- [ ] API tests: `tests/test_api.py`
-- [ ] Final README polish
+- [x] Dockerfile
+- [x] Docker Compose: `docker-compose.yml`
+- [x] `.dockerignore`
+- [x] GitHub Actions CI pipeline: `.github/workflows/ci.yml`
+- [x] CloudFormation template: `infra/cloudformation/template.yml`
+- [x] CloudFormation dev parameters: `infra/cloudformation/parameters.dev.json`
+- [x] AWS deployment guide: `docs/AWS_DEPLOYMENT.md`
+- [x] Final demo script: `docs/DEMO_SCRIPT.md`
+- [x] API tests: `tests/test_api.py`
+- [x] Final README polish
 
-**Status:** Not Started
+**Status:** Complete
 
 ---
 

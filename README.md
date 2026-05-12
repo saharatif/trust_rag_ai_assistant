@@ -1,13 +1,28 @@
 # TrustRAG: Enterprise AI Knowledge Assistant
 
-TrustRAG is a production-style FastAPI backend for an enterprise retrieval-augmented AI assistant. Week 2 adds Pinecone vector storage, OpenAI embeddings and chat, grounded answers with source citations, a safe unsupported-answer fallback, and a basic retrieval evaluation set.
+TrustRAG is a production-ready FastAPI backend for an enterprise retrieval-augmented AI assistant. It ingests internal documents, retrieves relevant context, generates grounded answers, scores each response for trustworthiness, routes low-confidence answers for human review, and maintains a full audit log — all deployable to AWS with a single command.
+
+## Architecture
+
+```
+POST /ingest  →  Chunking  →  Embeddings  →  Vector Store (Pinecone)
+                                                      │
+POST /chat    →  Retrieval  →  Prompt Builder  →  LLM (GPT-4o-mini)
+                                                      │
+                              Trust Score  →  Route for Review?
+                                                      │
+                                            Human Review Queue
+                                                      │
+                                              Audit Log (DB)
+```
 
 ## Requirements
 
 - Python 3.11+
-- pip
+- Docker (for containerized runs)
 - OpenAI API key
 - Pinecone API key (index: `trustrag`, dimension: 512, metric: cosine)
+- AWS CLI + account (for cloud deployment)
 
 ## Local Setup
 
@@ -17,7 +32,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Create a `.env` file in the project root with your keys:
+Create a `.env` file in the project root:
 
 ```bash
 APP_NAME=TrustRAG API
@@ -44,34 +59,25 @@ PINECONE_DIMENSIONS=512
 
 `.env` is gitignored and never committed.
 
-## Configuration
-
-| Variable | Default | Description |
-| --- | --- | --- |
-| `APP_NAME` | `TrustRAG API` | Service name returned by `/health` |
-| `APP_ENV` | `local` | Runtime environment label |
-| `LOG_LEVEL` | `INFO` | Python logging level |
-| `CHUNK_SIZE` | `800` | Maximum characters per document chunk |
-| `CHUNK_OVERLAP` | `120` | Character overlap between adjacent chunks |
-| `INGEST_RATE_LIMIT_PER_MINUTE` | `10` | Max ingest requests per client per minute |
-| `RETRIEVE_RATE_LIMIT_PER_MINUTE` | `30` | Max retrieve requests per client per minute |
-| `CHAT_RATE_LIMIT_PER_MINUTE` | `20` | Max chat requests per client per minute |
-| `OPENAI_API_KEY` | — | Required for embeddings and answer generation |
-| `OPENAI_EMBEDDING_MODEL` | `text-embedding-3-small` | Embedding model |
-| `OPENAI_CHAT_MODEL` | `gpt-4o-mini` | Chat model |
-| `PINECONE_API_KEY` | — | Required for vector storage and retrieval |
-| `PINECONE_INDEX_NAME` | `trustrag` | Pinecone index name |
-| `PINECONE_CLOUD` | `aws` | Cloud provider of the Pinecone index |
-| `PINECONE_REGION` | `us-east-1` | Region of the Pinecone index |
-| `PINECONE_DIMENSIONS` | `512` | Must match the index dimension |
-
 ## Run the API
 
 ```bash
 uvicorn src.api.main:app --reload
 ```
 
-The API will be available at `http://127.0.0.1:8000`.
+API available at `http://127.0.0.1:8000`.
+
+## Run with Docker
+
+```bash
+docker compose up --build
+```
+
+## Tests
+
+```bash
+pytest
+```
 
 ## Endpoints
 
@@ -81,37 +87,16 @@ The API will be available at `http://127.0.0.1:8000`.
 GET /health
 ```
 
-Expected response:
-
-```json
-{
-  "status": "ok",
-  "service": "TrustRAG API"
-}
-```
-
 ### Document Ingestion
 
 ```http
 POST /ingest
 ```
 
-Run with the sample data:
-
 ```bash
-curl -X POST http://127.0.0.1:8000/ingest \
+curl -X POST http://localhost:8000/ingest \
   -H "Content-Type: application/json" \
   --data-binary @data/sample_docs.json
-```
-
-Expected response shape:
-
-```json
-{
-  "documents_received": 2,
-  "chunks_created": 2,
-  "status": "success"
-}
 ```
 
 ### Retrieval
@@ -120,70 +105,46 @@ Expected response shape:
 POST /retrieve
 ```
 
-Example:
-
 ```bash
-curl -X POST http://127.0.0.1:8000/retrieve \
+curl -X POST http://localhost:8000/retrieve \
   -H "Content-Type: application/json" \
-  -d '{"query":"Can employees book business class flights?","top_k":3}'
+  -d '{"query": "PTO policy", "top_k": 3}'
 ```
 
-Expected response shape:
-
-```json
-{
-  "query": "Can employees book business class flights?",
-  "matches": [
-    {
-      "chunk_id": "policy_001_chunk_001",
-      "document_id": "policy_001",
-      "title": "Employee Travel Policy",
-      "score": 0.78,
-      "text": "Relevant text..."
-    }
-  ]
-}
-```
-
-### Chat
+### Chat (full RAG pipeline)
 
 ```http
 POST /chat
 ```
 
-Example:
-
 ```bash
-curl -X POST http://127.0.0.1:8000/chat \
+curl -X POST http://localhost:8000/chat \
   -H "Content-Type: application/json" \
-  -d '{"question":"Can employees book business class flights?","top_k":3}'
+  -d '{"question": "How much PTO do employees get?", "top_k": 5}'
 ```
 
-Expected response shape:
+Response includes `trust_score` (0.0–1.0), `needs_review` flag, and `answer_status` (`answered` or `unsupported`).
 
-```json
-{
-  "answer": "Business class flights require director approval...",
-  "sources": [
-    {
-      "document_id": "policy_001",
-      "title": "Employee Travel Policy",
-      "chunk_id": "policy_001_chunk_001"
-    }
-  ],
-  "confidence": "medium",
-  "status": "answered"
-}
+### Human Review
+
+```http
+GET  /review/pending
+POST /review/{id}/approve
+POST /review/{id}/reject
+POST /review/{id}/modify
 ```
 
-For unsupported questions, `/chat` returns `status: "unsupported"`, `confidence: "low"`, and no sources.
+## Trust Scoring
 
-## Run the RAG Flow
+Each response receives a trust score based on:
 
-1. Start the API: `uvicorn src.api.main:app --reload`
-2. Ingest documents: `curl -X POST http://127.0.0.1:8000/ingest -H "Content-Type: application/json" --data-binary @data/sample_docs.json`
-3. Query chunks: `POST /retrieve`
-4. Ask questions: `POST /chat`
+| Factor | Weight |
+|---|---|
+| Source credibility | `policy`/`contract` = 1.0, `manual` = 0.9, `report` = 0.8, `faq` = 0.6 |
+| Retrieval relevance | Embedding similarity score |
+| LLM confidence | `high` = 1.0×, `medium` = 0.85×, `low` = 0.5× |
+
+Responses scoring below **0.5** are automatically routed to the human review queue.
 
 ## Evaluation
 
@@ -191,12 +152,58 @@ For unsupported questions, `/chat` returns `status: "unsupported"`, `confidence:
 python -m src.eval.run_eval
 ```
 
-Ingests `data/sample_docs.json`, runs the 10-question dataset in `data/eval_questions.json`, reports top-1 retrieval accuracy, and saves results to `data/eval_results.json`.
+Runs the 10-question evaluation dataset in `data/eval_questions.json`. Week 2 result: **10/10 top-1 retrieval accuracy**.
 
-## Tests
+## AWS Deployment
+
+See [docs/AWS_DEPLOYMENT.md](docs/AWS_DEPLOYMENT.md) for the full deployment guide.
+
+Quick summary:
 
 ```bash
-pytest
+# Push image to ECR
+docker build -t trustrag:latest .
+docker tag trustrag:latest <ECR_URI>:latest
+docker push <ECR_URI>:latest
+
+# Deploy all infrastructure
+aws cloudformation deploy \
+  --template-file infra/cloudformation/template.yml \
+  --stack-name trustrag-dev \
+  --parameter-overrides file://infra/cloudformation/parameters.dev.json \
+  --capabilities CAPABILITY_NAMED_IAM \
+  --region us-east-1
 ```
 
-Current coverage: chunking, validation, config, logging, rate limiting, retrieval ranking, generator, prompt builder, and all API endpoints (unit + Pinecone/OpenAI integration).
+Provisions: ECR, ECS Fargate, ALB, IAM roles, CloudWatch logs, security groups.
+
+## CI/CD
+
+GitHub Actions (`.github/workflows/ci.yml`) runs on every push to `main`:
+
+1. Install dependencies
+2. Run `pytest` — fails fast on test failures
+3. Build Docker image
+4. Push to ECR and redeploy CloudFormation (requires `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `ECR_REPOSITORY` secrets)
+
+## Project Structure
+
+```
+src/
+├── api/          # FastAPI routes, schemas, rate limiting
+├── rag/          # Chunking, embeddings, retriever, prompt builder, generator
+├── agents/       # LangGraph agent graph, state, nodes
+├── trust/        # Trust score calculator
+├── db/           # Database schema, connection, query helpers
+└── eval/         # Retrieval evaluation script
+
+tests/            # pytest test suites
+data/             # Sample documents and evaluation dataset
+docs/             # Architecture, demo script, AWS deployment guide
+infra/            # CloudFormation template and parameters
+.github/          # CI/CD pipeline
+```
+
+## Demo
+
+See [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) for a step-by-step walkthrough of all features.
