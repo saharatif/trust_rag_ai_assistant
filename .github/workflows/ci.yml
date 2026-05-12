@@ -95,22 +95,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Check for unused imports
-        run: |
-          python -c "
-import ast
-import os
-
-for root, dirs, files in os.walk('src'):
-    for file in files:
-        if file.endswith('.py'):
-            filepath = os.path.join(root, file)
-            with open(filepath) as f:
-                try:
-                    ast.parse(f.read())
-                except SyntaxError as e:
-                    print(f'Syntax error in {filepath}: {e}')
-"
+      - name: Check syntax
+        run: find src tests -name "*.py" | xargs python -m py_compile && echo "Syntax OK"
 
       - name: Validate environment variables
         run: |
