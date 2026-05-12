@@ -1228,4 +1228,84 @@ The 4-week delivery will produce a working enterprise AI assistant backend with:
 - CI/CD pipeline
 - AWS CloudFormation deployment support
 
+---
+
+# 15. Week 5 — Frontend UI
+
+## Client Requirement
+
+The client requires a production-quality web interface for TrustRAG so that non-technical users (HR staff, reviewers, administrators) can interact with the system without using API tools or the terminal.
+
+## Required Working Outcome by End of Week 5
+
+A fully functional React frontend that connects to the TrustRAG FastAPI backend and supports all core workflows: asking questions, ingesting documents, and managing the human review queue.
+
+## Technology Stack
+
+| Area | Required Technology |
+|---|---|
+| Framework | React 18 + TypeScript |
+| Build Tool | Vite |
+| Styling | Tailwind CSS |
+| Component Library | shadcn/ui |
+| Routing | React Router v6 |
+| HTTP Client | Fetch API (native) |
+
+## Required Pages
+
+### Chat Page (`/`)
+- Message thread interface for asking questions
+- Trust score badge per answer (color-coded: green ≥ 0.75, yellow 0.5–0.74, red < 0.5)
+- Source citations (document title, source type, department)
+- "Needs Review" indicator for flagged responses
+- Loading state while waiting for API response
+
+### Ingest Page (`/ingest`)
+- Form to submit documents (ID, title, source type, department, text)
+- Confirmation showing chunks created on success
+- Support for submitting multiple documents per session
+
+### Review Queue Page (`/review`)
+- List all pending human review items
+- Per-item: question, answer, trust score, review reason
+- Actions: Approve, Reject, Modify (inline editor for corrected answer)
+
+## Required Files
+
+```
+frontend/
+├── package.json
+├── vite.config.ts
+├── tailwind.config.js
+├── components.json
+├── index.html
+├── src/
+│   ├── main.tsx
+│   ├── App.tsx
+│   ├── index.css
+│   ├── lib/
+│   │   ├── api.ts
+│   │   └── utils.ts
+│   ├── types/
+│   │   └── index.ts
+│   ├── components/
+│   │   ├── Layout.tsx
+│   │   ├── TrustScoreBadge.tsx
+│   │   └── ui/
+│   └── pages/
+│       ├── Chat.tsx
+│       ├── Ingest.tsx
+│       └── Review.tsx
+```
+
+## Acceptance Criteria
+
+- [ ] `npm run dev` starts the frontend on `http://localhost:5173`
+- [ ] Chat page sends questions to `POST /chat` and displays answers
+- [ ] Trust score is visually color-coded on every response
+- [ ] Ingest page submits documents to `POST /ingest` and shows result
+- [ ] Review page loads from `GET /review/pending` and supports approve/reject/modify
+- [ ] API base URL is configurable via `VITE_API_URL` environment variable
+- [ ] No TypeScript errors (`npm run build` succeeds)
+
 The final result should be a realistic production-style GenAI system that can be demonstrated end-to-end.
