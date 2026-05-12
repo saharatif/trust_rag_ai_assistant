@@ -36,8 +36,7 @@ jobs:
 
       - name: Lint with Pylance checks
         run: |
-          # Check for syntax errors
-          python -m py_compile src/**/*.py tests/**/*.py
+          find src tests -name "*.py" | xargs python -m py_compile
           echo "✓ Syntax validation passed"
 
       - name: Run pytest
