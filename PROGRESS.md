@@ -1,6 +1,6 @@
 # TrustRAG — Project Progress
 
-## Current Week: Week 4
+## Current Week: Week 5 (Complete)
 
 ## Last Updated: 2026-05-11
 
@@ -76,19 +76,39 @@
 
 ---
 
+## Week 5 — Frontend UI (React + Vite + Tailwind + shadcn/ui)
+
+- [x] Vite + React + TypeScript scaffold: `frontend/`
+- [x] Tailwind CSS + shadcn/ui setup
+- [x] API client: `frontend/src/lib/api.ts`
+- [x] App layout + routing: `frontend/src/App.tsx`
+- [x] Chat page with trust score badges: `frontend/src/pages/Chat.tsx`
+- [x] Ingest page with PDF uploader: `frontend/src/pages/Ingest.tsx`
+- [x] Review Queue page: `frontend/src/pages/Review.tsx`
+- [x] Chat history persistence across tabs: `frontend/src/lib/ChatContext.tsx`
+- [x] CORS middleware added to FastAPI: `src/api/main.py`
+- [x] CI pipeline fully fixed (10 bugs resolved): `bugs/ci-pipeline-bugs.md`
+- [x] AWS experimental deployment validated and torn down: `docs/AWS_EXPERIMENT.md`
+
+**Status:** Complete
+
+---
+
 ## Blockers
 
-- None currently
+- None
 
 ## Known Issues
 
-- External OpenAI/Pinecone provider wiring is still reserved for a later hardening pass; Week 2 runs locally with deterministic embeddings and an in-memory vector store.
+- AWS deployment torn down after validation to avoid charges (~$33/month). Re-deploy anytime using `docs/AWS_DEPLOYMENT.md`.
+- Frontend not yet hosted on AWS (runs locally via `npm run dev`). S3 + CloudFront deployment planned for production.
 
 ## Notes
 
-- Plans for each week saved to `.agent/plans/` (`1.WEEK1.md` through `4.WEEK4.md`)
-- Bug reports go in `bugs/` — use `bugs/TEMPLATE.md` as the starting format
-- Update this file at the end of every working session
+- Plans for each week saved to `.agent/plans/` (`1.WEEK1.md` through `5.WEEK5.md`)
+- Bug reports in `bugs/` — CI bugs: `bugs/ci-pipeline-bugs.md`, AWS bugs: `docs/AWS_EXPERIMENT.md`
 - Week 1 verified with `pytest`, `GET /health`, and `POST /ingest` using `data/sample_docs.json`.
-- Added configurable per-client rate limits for `GET /health` and `POST /ingest`.
 - Week 2 verified with `pytest` and `python -m src.eval.run_eval` at 10/10 top-1 retrieval accuracy.
+- Week 3 trust score bug fixed: division normalised by match count not sum of weights.
+- Week 4 CI pipeline fixed across 10 separate issues (see `bugs/ci-pipeline-bugs.md`).
+- Week 5 AWS deployment confirmed live at `trustrag-alb-dev-902053372.us-east-1.elb.amazonaws.com` then torn down.
