@@ -1,7 +1,8 @@
 # TrustRAG — Project Progress
 
-## Current Week: Week 2
-## Last Updated: 2026-05-09
+## Current Week: Week 4
+
+## Last Updated: 2026-05-11
 
 ---
 
@@ -42,19 +43,19 @@
 
 ## Week 3 — Agentic Workflow, Trust Score, and Human Review
 
-- [ ] Agent state schema: `src/agents/state.py`
-- [ ] Agent node functions: `src/agents/nodes.py`
-- [ ] LangGraph workflow graph: `src/agents/graph.py`
-- [ ] Trust score calculator: `src/trust/trust_score.py`
-- [ ] Database schema: `src/db/schema.sql`
-- [ ] Database connection: `src/db/database.py`
-- [ ] DB query helpers: `src/db/queries.py`
-- [ ] Human review endpoints: `src/api/routes_review.py`
-- [ ] Trust score tests: `tests/test_trust_score.py`
-- [ ] Architecture document: `docs/ARCHITECTURE.md`
-- [ ] Demo script draft: `docs/DEMO_SCRIPT.md`
+- [x] Agent state schema: `src/agents/state.py`
+- [x] Agent node functions: `src/agents/nodes.py`
+- [x] LangGraph workflow graph: `src/agents/graph.py`
+- [x] Trust score calculator: `src/trust/trust_score.py`
+- [x] Database schema: `src/db/schema.sql`
+- [x] Database connection: `src/db/database.py`
+- [x] DB query helpers: `src/db/queries.py`
+- [x] Human review endpoints: `src/api/routes_review.py`
+- [x] Trust score tests: `tests/test_trust_score.py`
+- [x] Architecture document: `docs/ARCHITECTURE.md`
+- [x] Demo script draft: `docs/DEMO_SCRIPT.md`
 
-**Status:** Not Started
+**Status:** Complete
 
 ---
 
